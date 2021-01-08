@@ -182,48 +182,6 @@ class OwnerCog(commands.Cog):
         else:
             await ctx.send("No suggestions found")
 
-    @commands.command(name="payout")
-    @commands.is_owner()
-    async def payout(self, ctx, option, id):
-        conn = sqlite3.connect(db_path)
-        c = conn.cursor()
-        multiplier = 0
-        id = int(id)
-        option = int(option)
-
-        c.execute("SELECT * FROM bets WHERE casino_id=? AND option=1", (id,))
-        option_one = c.fetchall()
-        print(option_one)
-
-        c.execute("SELECT * FROM bets WHERE casino_id=? AND option=2", (id,))
-        option_two = c.fetchall()
-
-        if option == 1:
-            multiplier = (100 - ((len(option_one) / (len(option_one) + len(option_two))) * 100)) + 1
-            for row in option_one:
-                print(user_id)
-                user_id = row[1]
-                bet = row[3]
-                c.execute("UPDATE users SET balance = ? + ? * ? WHERE user_id=?", (bet,bet,multiplier,user_id,))
-                conn.commit()
-        else:
-
-            multiplier = (100 - ((len(option_one) / (len(option_one) + len(option_two))) * 100)) + 1
-            for row in option_one:
-                user_id = row[1]
-                bet = row[3]
-                c.execute("UPDATE users SET balance = ? + ? * ? WHERE user_id=?", (bet,bet,multiplier,user_id,))
-                conn.commit()
-
-        c.execute("DELETE FROM casino WHERE casino_id=?", (id,))
-        c.execute("DELETE FROM bets WHERE casino_id=?", (id,))
-        conn.commit()
-
-        await ctx.send("OPTION {} HAS WON WITH A MULTIPLIER OF {}".format(option, multipler))
-        return
-
-
-
 
 def setup(bot):
     bot.add_cog(OwnerCog(bot))
