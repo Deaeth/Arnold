@@ -17,6 +17,13 @@ class OwnerCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def get_user(self, id):
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+
+        c.execute("SELECT * FROM users WHERE user_id=?", (id,))
+        return c.fetchone()
+
     @commands.command(name="load", hidden=True)
     @commands.is_owner()
     async def _cog_load(self, ctx, *, cog: str):
@@ -54,13 +61,18 @@ class OwnerCog(commands.Cog):
     @commands.command(name="database")
     @commands.is_owner()
     async def database(self, ctx):
-        guild = ctx.guild
-        for member in guild.members:
-            conn = sqlite3.connect(db_path)
-            c = conn.cursor()
+        for guild in self.bot.guilds:
+            for member in guild.members:
+                member_account = await self.get_user(member.id)
 
-            c.execute("INSERT INTO users (user_id, balance) VALUES (?, ?)", (member.id,0,))
-            conn.commit()
+                if member_account:
+                    continue
+
+                conn = sqlite3.connect(db_path)
+                c = conn.cursor()
+
+                c.execute("INSERT INTO users (user_id, balance) VALUES (?, ?)", (member.id,0,))
+                conn.commit()
 
 
     @commands.command(name='shutdown', hidden=True)

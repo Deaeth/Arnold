@@ -5,6 +5,9 @@ import sqlite3
 import asyncio
 import time
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(BASE_DIR, "db.db")
+
 class Games(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
