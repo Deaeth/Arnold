@@ -302,10 +302,10 @@ class UserCog(commands.Cog):
 
     @commands.command(name="fortune")
     async def fortune(self, ctx):
-        json_file = open ("imports.json")
-        fortunes = json.dumps(json_file)
-        print(fortunes)
-        await ctx.send(random.choice(fortunes))
+        with open("imports.json", 'r') as f:
+            json_data = json.load(f)
+            fortunes = json_data["fortunes"]
+            await ctx.send(random.choice(fortunes))
 
 def setup(bot):
     bot.add_cog(UserCog(bot))
