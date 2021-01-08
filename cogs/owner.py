@@ -170,24 +170,6 @@ class OwnerCog(commands.Cog):
         else:
             await ctx.send("No suggestions found")
 
-
-    @commands.command(name="createcasino")
-    @commands.is_owner()
-    async def createcasino(self, ctx, question, option_one, option_two, timeLimit):
-        origMsg = await ctx.send("**NEW CASINO BET**\n*Open for {} seconds*\n\n**QUESTION**: {}\nOption One: {}\nOption Two: {}".format(timeLimit, question, option_one, option_two))
-
-        conn = sqlite3.connect(db_path)
-        c = conn.cursor()
-
-        c.execute("INSERT INTO casino (bet_id, status) VALUES (?,?)", (ctx.author.id,"active",))
-        conn.commit()
-
-        await asyncio.sleep(int(timeLimit))
-        await origMsg.edit(content="**NEW CASINO BET**\n*Casino is closed*\n\n**QUESTION**: {}\nOption One: {}\nOption Two: {}".format(question, option_one, option_two))
-        c.execute("UPDATE casino SET status=? WHERE bet_id=?", ("inactive",ctx.author.id))
-        conn.commit()
-        return
-
     @commands.command(name="payout")
     @commands.is_owner()
     async def payout(self, ctx, option, id):
