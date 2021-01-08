@@ -6,6 +6,7 @@ class Events(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+# Wenis is gay
 
     async def create_log(self, title, name):
 
