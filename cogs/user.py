@@ -99,6 +99,61 @@ class UserCog(commands.Cog):
             #conn.commit()
 
     @commands.group(pass_context=True)
+    async def casino(self, ctx):
+        if ctx.invoked_subcommand is None:
+            msg = await ctx.send("Invalid use of casino command")
+            await asyncio.sleep(2)
+            await msg.delete()
+
+    @casino.command(pass_context=True)
+    async def join(ctx, option, bet):
+        await ctx.message.delete()
+        try:
+            option = int(option)
+            bet = int(bet)
+        except Exception:
+            msg = await ctx.send("Your choice and bet must be integers")
+            await asyncio.sleep(3)
+            await msg.delete()
+            return
+
+        if option != 1 and option != 2:
+            msg = await ctx.send("You must pick 1 or 2 for your options")
+            await asyncio.sleep(3)
+            await msg.delete()
+            return
+
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+
+        c.execute("SELECT * FROM bets WHERE user_id=?", (ctx.author.id,))
+        row = c.fetchone()
+
+        if row:
+            msg = await ctx.send("You've already placed your bet!")
+            await asyncio.sleep(3)
+            await msg.delete()
+            return
+
+        c.execute("SELECT * FROM users WHERE user_id=?", (ctx.author.id,))
+        row = c.fetchone()
+
+        if row[2] < bet:
+            msg = await ctx.send("You don't have that much to bet!")
+            await asyncio.sleep(3)
+            await msg.delete()
+            return
+
+        c.execute("UPDATE users SET balance=balance-? WHERE user_id=?", (bet, ctx.author.id,))
+        c.execute("INSERT INTO bets (user_id, option, bet) VALUES (?,?, ?)", (ctx.author.id,option,bet,))
+        conn.commit()
+
+        msg = await ctx.send("You have placed your bet!")
+        await asyncio.sleep(3)
+        await msg.delete()
+        return
+
+    @commands.group(pass_context=True)
     async def money(self, ctx):
         if ctx.invoked_subcommand is None:
             await ctx.send("Invalid use of money command")
