@@ -4,6 +4,7 @@ import os
 import sqlite3
 import asyncio
 import time
+import random
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(BASE_DIR, "db.db")
@@ -23,25 +24,79 @@ class Games(commands.Cog):
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(BASE_DIR, "db.db")
 
+    @commands.command(name="coinflip")
+    async def coinflip(self, ctx):
+        winner = random.randint(0, 1)
+        if (winner == 0):
+            await ctx.send("It's Heads!")
+        else:
+            await ctx.send("It's Tails!")
+        return
+
     @casino.command(pass_context=True)
-    @commands.is_owner()
     async def create(self, ctx, question, option_one, option_two, timeLimit):
         origMsg = await ctx.send("**NEW CASINO BET**\n*Open for {} seconds*\n\n**QUESTION**: {}\nOption One: {}\nOption Two: {}".format(timeLimit, question, option_one, option_two))
 
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
 
-        c.execute("INSERT INTO casino (bet_id, status) VALUES (?,?)", (ctx.author.id,"active",))
+        c.execute("INSERT INTO casino (casino_id, status) VALUES (?,?)", (ctx.author.id,"active",))
         conn.commit()
 
         await asyncio.sleep(int(timeLimit))
         await origMsg.edit(content="**NEW CASINO BET**\n*Casino is closed*\n\n**QUESTION**: {}\nOption One: {}\nOption Two: {}".format(question, option_one, option_two))
-        c.execute("UPDATE casino SET status=? WHERE bet_id=?", ("inactive",ctx.author.id))
+        c.execute("UPDATE casino SET status=? WHERE casino_id=?", ("inactive",ctx.author.id))
         conn.commit()
         return
 
     @casino.command(pass_context=True)
-    async def join(ctx, option, bet):
+    async def payout(self, ctx, option, id):
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        multiplier = 0
+        id = int(id)
+        option = int(option)
+
+        c.execute("SELECT * FROM bets WHERE option=1")
+        option_one = c.fetchall()
+        print(option_one)
+
+        c.execute("SELECT * FROM bets WHERE option=2")
+        option_two = c.fetchall()
+
+        if option == 1:
+            if len(option_one) == 0:
+                await ctx.send("No one voted for this one!")
+                return
+            else:
+                multiplier = (100 - ((len(option_one) / (len(option_one) + len(option_two))) * 100)) / 100 + 1
+                for row in option_one:
+                    print(row, row[2], row[4])
+                    user_id = row[2]
+                    bet = row[4]
+                    c.execute("UPDATE users SET balance = balance + (? * ?) WHERE user_id=?", (bet,multiplier,user_id,))
+                    conn.commit()
+        else:
+            if len(option_two) == 0:
+                await ctx.send("No one voted for this one!")
+                return
+            else:
+                multiplier = (100 - ((len(option_two) / (len(option_one) + len(option_two))) * 100)) / 100 + 1
+                for row in option_two:
+                    user_id = row[2]
+                    bet = row[4]
+                    c.execute("UPDATE users SET balance = balance + (? * ?) WHERE user_id=?", (bet,multiplier,user_id,))
+                    conn.commit()
+
+        c.execute("DELETE FROM casino WHERE casino_id=?", (id,))
+        c.execute("DELETE FROM bets")
+        conn.commit()
+
+        await ctx.send("OPTION {} HAS WON WITH A MULTIPLIER OF {}".format(option, multiplier))
+        return
+
+    @casino.command(pass_context=True)
+    async def join(self, ctx, option, bet):
         await ctx.message.delete()
         try:
             option = int(option)
