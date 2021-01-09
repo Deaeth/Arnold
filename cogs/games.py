@@ -24,7 +24,6 @@ class Games(commands.Cog):
     db_path = os.path.join(BASE_DIR, "db.db")
 
     @casino.command(pass_context=True)
-    @commands.is_owner()
     async def create(self, ctx, question, option_one, option_two, timeLimit):
         origMsg = await ctx.send("**NEW CASINO BET**\n*Open for {} seconds*\n\n**QUESTION**: {}\nOption One: {}\nOption Two: {}".format(timeLimit, question, option_one, option_two))
 
@@ -41,7 +40,6 @@ class Games(commands.Cog):
         return
 
     @casino.command(pass_context=True)
-    @commands.is_owner()
     async def payout(self, ctx, option, id):
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
