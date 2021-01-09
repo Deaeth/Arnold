@@ -5,6 +5,7 @@ import random
 import sqlite3
 import os.path
 import wikipediaapi
+import json
 
 from discord.ext import commands
 
@@ -97,61 +98,6 @@ class UserCog(commands.Cog):
             #print(ctx.author.id)
             #c.execute("UPDATE users SET balance=balance + ? WHERE user_id=?", (1000, ctx.author.id,))
             #conn.commit()
-
-    @commands.group(pass_context=True)
-    async def casino(self, ctx):
-        if ctx.invoked_subcommand is None:
-            msg = await ctx.send("Invalid use of casino command")
-            await asyncio.sleep(2)
-            await msg.delete()
-
-    @casino.command(pass_context=True)
-    async def join(ctx, option, bet):
-        await ctx.message.delete()
-        try:
-            option = int(option)
-            bet = int(bet)
-        except Exception:
-            msg = await ctx.send("Your choice and bet must be integers")
-            await asyncio.sleep(3)
-            await msg.delete()
-            return
-
-        if option != 1 and option != 2:
-            msg = await ctx.send("You must pick 1 or 2 for your options")
-            await asyncio.sleep(3)
-            await msg.delete()
-            return
-
-        conn = sqlite3.connect(db_path)
-        c = conn.cursor()
-
-        c.execute("SELECT * FROM bets WHERE user_id=?", (ctx.author.id,))
-        row = c.fetchone()
-
-        if row:
-            msg = await ctx.send("You've already placed your bet!")
-            await asyncio.sleep(3)
-            await msg.delete()
-            return
-
-        c.execute("SELECT * FROM users WHERE user_id=?", (ctx.author.id,))
-        row = c.fetchone()
-
-        if row[2] < bet:
-            msg = await ctx.send("You don't have that much to bet!")
-            await asyncio.sleep(3)
-            await msg.delete()
-            return
-
-        c.execute("UPDATE users SET balance=balance-? WHERE user_id=?", (bet, ctx.author.id,))
-        c.execute("INSERT INTO bets (user_id, option, bet) VALUES (?,?, ?)", (ctx.author.id,option,bet,))
-        conn.commit()
-
-        msg = await ctx.send("You have placed your bet!")
-        await asyncio.sleep(3)
-        await msg.delete()
-        return
 
     @commands.group(pass_context=True)
     async def money(self, ctx):
@@ -299,10 +245,12 @@ class UserCog(commands.Cog):
         conn.commit()
         await ctx.send("Your suggestion has been dumped in the trash!")
 
-@commands.command(name="fortunecookie")
-async def fortune(self, ctx):
-    fortunes = ['A beautiful, smart, and loving person will be coming into your life.', 'A beautiful, smart, and loving person will be coming into your life.','A faithful friend is a strong defense.','A feather in the hand is better than a bird in the air. ','A fresh start will put you on your way.','A friend asks only for your time not your money.','A friend is a present you give yourself.','A gambler not only will lose what he has, but also will lose what he doesn’t have.','A golden egg of opportunity falls into your lap this month.','A good friendship is often more important than a passionate romance.','A good time to finish up old tasks.','A hunch is creativity trying to tell you something.','A lifetime friend shall soon be made.','A lifetime of happiness lies ahead of you.','A light heart carries you through all the hard times.','A new perspective will come with the new year.','A person is never too old to learn.','A person of words and not deeds is like a garden full of weeds.','A pleasant surprise is waiting for you.','A short pencil is usually better than a long memory any day.','A small donation is call for. It’s the right thing to do.','A smile is your personal welcome mat.','A smooth long journey! Great expectations.','A soft voice may be awfully persuasive.','A truly rich life contains love and art in abundance.','Accept something that you cannot change, and you will feel better.','Adventure can be real happiness.','Advice is like kissing. It costs nothing and is a pleasant thing to do.','Advice, when most needed, is least heeded.','All the effort you are making will ultimately pay off.','All the troubles you have will pass away very quickly.','All will go well with your new project.','All your hard work will soon pay off.','Allow compassion to guide your decisions.','An acquaintance of the past will affect you in the near future.','An agreeable romance might begin to take on the appearance.']
-    await ctx.send(random.choice(fortunes))
+    @commands.command(name="fortune")
+    async def fortune(self, ctx):
+        with open("imports.json", 'r') as f:
+            json_data = json.load(f)
+            fortunes = json_data["fortunes"]
+            await ctx.send(random.choice(fortunes))
 
 def setup(bot):
     bot.add_cog(UserCog(bot))
