@@ -4,6 +4,7 @@ import os
 import sqlite3
 import asyncio
 import time
+import random
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(BASE_DIR, "db.db")
@@ -22,6 +23,15 @@ class Games(commands.Cog):
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(BASE_DIR, "db.db")
+
+    @commands.command(name="coinflip")
+    async def coinflip(self, ctx):
+        winner = random.randint(0, 1)
+        if (winner == 0):
+            await ctx.send("It's Heads!")
+        else:
+            await ctx.send("It's Tails!")
+        return
 
     @casino.command(pass_context=True)
     async def create(self, ctx, question, option_one, option_two, timeLimit):
