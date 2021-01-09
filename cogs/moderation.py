@@ -14,8 +14,15 @@ class ModerationCog(commands.Cog):
         self.bot = bot
 
     async def create_log(self, moderator: discord.Member, user: discord.Member, command, reason):
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        date = datetime.datetime.now()
+
+        c.execute("INSERT INTO logs (user_id, moderator_id, action, reason, date) VALUES (?,?,?,?, ?)", (user.id, moderator.id, command, reason, date,))
+        conn.commit()
+
         image = user.avatar_url
-        embed = discord.Embed(title=command, timestamp=datetime.datetime.now(), color=0x2403fc)
+        embed = discord.Embed(title=command, timestamp=date, color=0x2403fc)
         embed.set_thumbnail(url=image)
         embed.add_field(name="Moderator", value=moderator, inline=True)
         embed.add_field(name="User", value=user, inline=True)
@@ -54,6 +61,36 @@ class ModerationCog(commands.Cog):
                 return True
         return False
 
+
+    @commands.command(name="rapsheet")
+    @commands.check(has_moderator)
+    async def rapsheet(self, ctx, id):
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        id = int(id)
+        user = self.bot.get_user(id)
+        image = user.avatar_url
+        embed = discord.Embed(title="Rapsheet for {}".format(user.name), color=0x2403fc)
+
+        embed.set_thumbnail(url=image)
+
+        c.execute("SELECT * FROM logs WHERE user_id=?", (id,))
+        rows = c.fetchall()
+
+        if not rows:
+            await ctx.send("That user has no infractions")
+            return
+
+        for x in range(5):
+            row = rows[x]
+            moderator = self.bot.get_user(row[2])
+            action = row[3]
+            date = row[4]
+            reason = row[5]
+            embed.add_field(name=row[3], value="Moderator: {}\nReason: {}\nDate: {}".format(moderator.name, reason, date), inline=False)
+        embed.set_footer(text="Total Infractions: {}".format(len(rows)))
+
+        await ctx.send(embed=embed)
 
     @commands.command(name="mute")
     @commands.check(has_moderator)
