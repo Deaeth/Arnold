@@ -64,17 +64,26 @@ class ModerationCog(commands.Cog):
 
     @commands.command(name="rapsheet")
     @commands.check(has_moderator)
-    async def rapsheet(self, ctx, id):
+    async def rapsheet(self, ctx, user):
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
-        id = int(id)
-        user = self.bot.get_user(id)
+        try:
+            user_id = int(user)
+
+        except:
+            try:
+                user_id=ctx.message.mentions[0].id
+            except:
+                await ctx.send("You need to mention the user or type their id")
+                return
+
+        user = self.bot.get_user(user_id)
         image = user.avatar_url
         embed = discord.Embed(title="Rapsheet for {}".format(user.name), color=0x2403fc)
 
         embed.set_thumbnail(url=image)
 
-        c.execute("SELECT * FROM logs WHERE user_id=?", (id,))
+        c.execute("SELECT * FROM logs WHERE user_id=?", (user_id,))
         rows = c.fetchall()
 
         if not rows:
