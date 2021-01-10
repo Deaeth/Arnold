@@ -2,3 +2,4 @@
 main.py
 db.db
 cogs/db.db
+*.db
