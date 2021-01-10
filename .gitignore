@@ -1,3 +1,4 @@
 .DS_Store
 main.py
 db.db
+cogs/db.db
