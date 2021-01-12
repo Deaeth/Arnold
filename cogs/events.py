@@ -58,31 +58,6 @@ class Events(commands.Cog):
         return
 
 
-    @commands.Cog.listener()
-    @commands.check(is_server)
-    async def on_guild_channel_delete(self, channel):
-
-        await self.create_log("Deleted Channel", channel.name)
-
-    @commands.Cog.listener()
-    @commands.check(is_server)
-    async def on_guild_channel_create(self, channel):
-
-        await self.create_log("Created Channel", channel.name)
-
-    @commands.Cog.listener()
-    @commands.check(is_server)
-    async def on_guild_role_create(self, role):
-
-        await self.create_log("Created Role", role.name)
-
-    @commands.Cog.listener()
-    @commands.check(is_server)
-    async def on_guild_role_delete(self, role):
-
-        await self.create_log("Deleted Role", role.name)
-
-
 
 def setup(bot):
     bot.add_cog(Events(bot))
