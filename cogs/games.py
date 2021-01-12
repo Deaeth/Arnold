@@ -24,6 +24,12 @@ class Games(commands.Cog):
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(BASE_DIR, "db.db")
 
+    async def has_moderator(ctx):
+        for role in ctx.author.roles:
+            if role.id == 779430696510160936  or ctx.author.id == 344666116456710144:
+                return True
+        return False
+
     @commands.command(name="coinflip")
     async def coinflip(self, ctx):
         winner = random.randint(0, 1)
@@ -34,6 +40,7 @@ class Games(commands.Cog):
         return
 
     @casino.command(pass_context=True)
+    @commands.check(has_moderator)
     async def create(self, ctx, question, option_one, option_two, timeLimit):
         origMsg = await ctx.send("**NEW CASINO BET**\n*Open for {} seconds*\n\n**QUESTION**: {}\nOption One: {}\nOption Two: {}".format(timeLimit, question, option_one, option_two))
 
@@ -50,12 +57,15 @@ class Games(commands.Cog):
         return
 
     @casino.command(pass_context=True)
+    @commands.check(has_moderator)
     async def payout(self, ctx, option, id):
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
         multiplier = 0
         id = int(id)
         option = int(option)
+
+        await ctx.delete()
 
         c.execute("SELECT * FROM bets WHERE option=1")
         option_one = c.fetchall()

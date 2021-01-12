@@ -58,6 +58,42 @@ class OwnerCog(commands.Cog):
         else:
             await ctx.send('**`SUCCESS`**')
 
+    @commands.command("banrole")
+    @commands.is_owner()
+    async def banrole(self, ctx, roleId):
+        role = dungoned = get(ctx.author.guild.roles, id=int(roleId))
+        to_ban = role.members
+
+        for member in to_ban:
+            await member.ban()
+            await ctx.send("Users with the {} role have been banned!".format(role.name))
+
+    @commands.command("dungeonrole")
+    @commands.is_owner()
+    async def dungeonrole(self, ctx, roleId: int):
+        role = get(ctx.author.guild.roles, id=roleId)
+        to_dungeon = role.members
+
+        dungoned = get(ctx.author.guild.roles, name="Dungeoned 🔗")
+        for member in to_dungeon:
+            await member.add_roles(dungoned, reason="reason", atomic=True)
+
+        await ctx.send("Everyone with the role {} has been dungoned".format(role.name))
+
+        dungeon = self.bot.get_channel(777217521429643277)
+        await dungeon.send("Welcome to the dungeon {}".format(role.name))
+
+    @commands.command("releaserole")
+    @commands.is_owner()
+    async def realeaserole(self, ctx, roleId: int):
+        role = get(ctx.author.guild.roles, id=roleId)
+        to_release = role.members
+        dungoned = get(ctx.author.guild.roles, name="Dungeoned 🔗")
+        for member in to_release:
+            await member.remove_roles(dungoned, reason = "released")
+
+        await ctx.send("Everyone with the role {} has been released".format(role.name))
+
     @commands.command(name="database")
     @commands.is_owner()
     async def database(self, ctx):

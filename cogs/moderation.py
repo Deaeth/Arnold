@@ -101,6 +101,38 @@ class ModerationCog(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.command("poll")
+    @commands.check(has_moderator)
+    async def poll(self, ctx, question, timeLimit):
+        yes_count = 0
+        no_count = 0
+        winner = ""
+
+        await ctx.message.delete()
+        origMsg = await ctx.send("**NEW Poll**\n*Open for {} seconds*\n\n**QUESTION**: {}".format(timeLimit, question))
+        origMsg = discord.utils.get(self.bot.cached_messages, id=origMsg.id)
+
+        await origMsg.add_reaction("✅")
+        await origMsg.add_reaction("❌")
+
+        await asyncio.sleep(int(timeLimit))
+
+        for reaction in origMsg.reactions:
+            if str(reaction.emoji) == "✅":
+                yes_count = reaction.count
+            elif str(reaction.emoji) == "❌":
+                no_count = reaction.count
+
+        if yes_count > no_count:
+            winner = "Yes"
+        elif no_count > yes_count:
+            winner = "No"
+        else:
+            winner = "Tied"
+
+        await origMsg.edit(content="**NEW Poll**\n*Closed*\n\n**QUESTION**: {}\n**WINNER**: {}".format(question, winner))
+        return
+
     @commands.command(name="mute")
     @commands.check(has_moderator)
     async def mute(self, ctx, member: discord.Member, length, *, reason):
