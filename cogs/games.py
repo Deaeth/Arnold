@@ -164,7 +164,7 @@ async def slotmachine(self, ctx):
         msg = "**LOSER!**" + " " + "<:OB_bebela:737110263836311733> <a:OB_teatime:737109485302055003>"
     message = await ctx.send("❎❎❎")
     await asyncio.sleep(1)
-    await message.edit(content=randomOutcomes[0] + randomOutcomes[1] + randomOutcomes[2]) + "\n" + msg)
+    await message.edit(content=randomOutcomes[0] + randomOutcomes[1] + randomOutcomes[2] + "\n" + msg)
 
 
 def setup(bot):
