@@ -159,12 +159,13 @@ class Games(commands.Cog):
         randomOutcomes = [random.choice(outcomes), random.choice(outcomes), random.choice(outcomes)]
         msg = ""
         if randomOutcomes[0] == randomOutcomes[1] == randomOutcomes[2]:
-            msg = "**YOU WIN!**" + " " + "<:ows:795610235570094080>"
+            msg = "**YOU WIN!**" + " " + "<:OB_hasCapital:790800758207021126><a:OB_winetime:796556837981257778>"
         else:
             msg = "**LOSER!**" + " " + "<:OB_bebela:737110263836311733> <a:OB_teatime:737109485302055003>"
         message = await ctx.send("❎❎❎")
         await asyncio.sleep(1)
-        await message.edit(content=randomOutcomes[0] + randomOutcomes[1] + randomOutcomes[2] + "\n" + msg)
+        await message.edit(content=randomOutcomes[0] + randomOutcomes[1] + randomOutcomes[2])
+        await ctx.send(msg)
 
 
 def setup(bot):
