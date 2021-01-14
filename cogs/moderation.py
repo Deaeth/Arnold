@@ -57,7 +57,7 @@ class ModerationCog(commands.Cog):
 
     async def has_moderator(ctx):
         for role in ctx.author.roles:
-            if role.id == 779430696510160936  or ctx.author.id == 344666116456710144:
+            if role.id == 779430696510160936  or ctx.author.id == 344666116456710144 or role.id == 769842662580027452:
                 return True
         return False
 
