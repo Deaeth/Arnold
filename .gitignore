@@ -6,3 +6,4 @@ cogs/db.db
 cogs/owner.py
 arnold.mp3
 cogs/db.db
+*.pyc

@@ -153,18 +153,19 @@ class Games(commands.Cog):
         await msg.delete()
         return
 
-@commands.command(name = "slotmachine")
-async def slotmachine(self,ctx):
-    outcomes = ["<:OB_ratdogsmile:791772548144693268>","<:OB_ratdog:737111061722955807>","<:OB_mike:737105902720647258>","<:OB_monkastare:755857538632777899>"]
-    randomOutcomes = [random.choice(outcomes), random.choice(outcomes), random.choice(outcomes)]
-    msg = ""
-    if randomOutcomes[0] == randomOutcomes[1] == randomOutcomes[2]:
-        msg = "**YOU WIN!**" + " " + "<:OB_hasCapital:790800758207021126> <a:OB_winetime:796556837981257778>"
-    else:
-        msg = "**LOSER!**" + " " + "<:OB_bebela:737110263836311733> <a:OB_teatime:737109485302055003>"
-    message = await ctx.send("❎❎❎")
-    await asyncio.sleep(1)
-    await message.edit(content=randomOutcomes[0] + randomOutcomes[1] + randomOutcomes[2]) + "\n" + msg)
+
+      @commands.command(name = "slotmachine")
+      async def slotmachine(self,ctx):
+         outcomes = ["<:OB_ratdogsmile:791772548144693268>","<:OB_ratdog:737111061722955807>","<:OB_mike:737105902720647258>","<:OB_monkastare:755857538632777899>"]
+         randomOutcomes = [random.choice(outcomes), random.choice(outcomes), random.choice(outcomes)]
+         msg = ""
+         if randomOutcomes[0] == randomOutcomes[1] == randomOutcomes[2]:
+             msg = "**YOU WIN!**" + " " + "<:OB_hasCapital:790800758207021126> <a:OB_winetime:796556837981257778>"
+         else:
+             msg = "**LOSER!**" + " " + "<:OB_bebela:737110263836311733> <a:OB_teatime:737109485302055003>"
+         message = await ctx.send("❎❎❎")
+         await asyncio.sleep(1)
+         await message.edit(content=randomOutcomes[0] + randomOutcomes[1] + randomOutcomes[2]) + "\n" + msg)
 
 
 def setup(bot):
