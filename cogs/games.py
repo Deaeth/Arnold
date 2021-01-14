@@ -156,8 +156,8 @@ class Games(commands.Cog):
 
       @commands.command(name = "slotmachine")
       async def slotmachine(self,ctx):
-         outcomes = ["<:OB_ratdogsmile:791772548144693268>","<:OB_ratdog:737111061722955807>","<:OB_mike:737105902720647258>","<:OB_monkastare:755857538632777899>","<:OB_ratdog:737111061722955807>"]
-         randomOutcomes = [random.choice(outcomes), random.choice(outcomes), random.choice(outcomes)]
+         outcomes = ["<:OB_ratdogsmile:791772548144693268>","<:OB_ratdog:737111061722955807>","<:OB_mike:737105902720647258>","<:OB_monkastare:755857538632777899>"]
+         randomOutcomes = random.choices(outcomes, weights=(62, 28, 46, 84), k=3)
          msg = ""
          if randomOutcomes[0] == randomOutcomes[1] == randomOutcomes[2]:
              msg = "**YOU WIN!**" + " " + "<:OB_hasCapital:790800758207021126> <a:OB_winetime:796556837981257778>"
