@@ -3,6 +3,8 @@ import discord
 import asyncio
 import sqlite3
 import os
+from .classes.UserAccount import UserAccount
+from .GlobalFunctions import GlobalFunctions as GF
 from discord.utils import get
 from gtts import gTTS
 from discord import FFmpegPCMAudio
@@ -82,6 +84,20 @@ class OwnerCog(commands.Cog):
 
         dungeon = self.bot.get_channel(777217521429643277)
         await dungeon.send("Welcome to the dungeon {}".format(role.name))
+
+    @commands.command("block")
+    @commands.is_owner()
+    async def block(self, ctx, id, command):
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+
+        await ctx.message.delete()
+        c.execute("INSERT INTO blocked (user_id, command) VALUES (?,?)", (id,command,))
+        conn.commit()
+
+        await ctx.send("{} has been blocked from the {} command".format(self.bot.get_user(int(id)).mention, command))
+        return
+
 
     @commands.command("releaserole")
     @commands.is_owner()

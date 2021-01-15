@@ -6,6 +6,7 @@ import sqlite3
 import os.path
 import wikipediaapi
 import json
+from .GlobalFunctions import GlobalFunctions as GF
 
 from discord.ext import commands
 
@@ -24,10 +25,12 @@ class UserCog(commands.Cog):
             return False
         return True
 
-
+    async def not_blocked(ctx):
+        return GF.check_block(ctx.author.id, ctx.command.name)
 
 
     @commands.command(name="ob")
+    @commands.check(not_blocked)
     async def ob(self, ctx, *, names):
         obServer = self.bot.get_guild(737104128777650217)
         names = names.split()
@@ -42,6 +45,7 @@ class UserCog(commands.Cog):
         await ctx.message.delete()
 
     @commands.command(name="wiki")
+    @commands.check(not_blocked)
     async def wiki(self, ctx, *, search):
 
         loopCount = 0
@@ -85,6 +89,7 @@ class UserCog(commands.Cog):
 
     @commands.command(name="roulette")
     @commands.is_owner()
+    @commands.check(not_blocked)
     async def roulette(self, ctx):
         roll = random.randint(1, 6)
         if roll == 3:
@@ -100,11 +105,13 @@ class UserCog(commands.Cog):
             #conn.commit()
 
     @commands.group(pass_context=True)
+    @commands.check(not_blocked)
     async def money(self, ctx):
         if ctx.invoked_subcommand is None:
             await ctx.send("Invalid use of money command")
 
     @money.command(pass_context=True)
+    @commands.check(not_blocked)
     async def balance(self, ctx):
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
@@ -114,11 +121,13 @@ class UserCog(commands.Cog):
         await ctx.send("You have {} coins".format(row[0][2]))
 
     @commands.group(pass_context=True)
+    @commands.check(not_blocked)
     async def tourney(self, ctx):
         if ctx.invoked_subcommand is None:
             await ctx.send("Invalid use of tourney command")
 
     @tourney.command(pass_context=True)
+    @commands.check(not_blocked)
     async def show(self, ctx, name, round):
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
@@ -141,6 +150,7 @@ class UserCog(commands.Cog):
 
 
     @tourney.command(pass_context=True)
+    @commands.check(not_blocked)
     async def create(self, ctx, name, users: int):
 
 
@@ -188,6 +198,7 @@ class UserCog(commands.Cog):
 
 
     @tourney.command(pass_context=True)
+    @commands.check(not_blocked)
     async def join(self, ctx, tourneyName):
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
@@ -237,6 +248,7 @@ class UserCog(commands.Cog):
 
 
     @commands.command(name="suggest")
+    @commands.check(not_blocked)
     async def suggestion(self, ctx, *, suggestion):
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
@@ -246,6 +258,7 @@ class UserCog(commands.Cog):
         await ctx.send("Your suggestion has been dumped in the trash!")
 
     @commands.command(name="fortune")
+    @commands.check(not_blocked)
     async def fortune(self, ctx):
         with open("imports.json", 'r') as f:
             json_data = json.load(f)

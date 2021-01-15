@@ -5,6 +5,7 @@ import sqlite3
 import os
 from discord.ext import commands
 from discord.utils import get
+from .GlobalFunctions import GlobalFunctions as GF
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(BASE_DIR, "db.db")
@@ -61,9 +62,13 @@ class ModerationCog(commands.Cog):
                 return True
         return False
 
+    async def not_blocked(ctx):
+        return GF.check_block(self, ctx.author.id, ctx.command.name)
+
 
     @commands.command(name="rapsheet")
     @commands.check(has_moderator)
+    @commands.check(not_blocked)
     async def rapsheet(self, ctx, user):
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
@@ -103,6 +108,7 @@ class ModerationCog(commands.Cog):
 
     @commands.command("poll")
     @commands.check(has_moderator)
+    @commands.check(not_blocked)
     async def poll(self, ctx, question, timeLimit):
         yes_count = 0
         no_count = 0
@@ -135,6 +141,7 @@ class ModerationCog(commands.Cog):
 
     @commands.command(name="mute")
     @commands.check(has_moderator)
+    @commands.check(not_blocked)
     async def mute(self, ctx, member: discord.Member, length, *, reason):
         print(member, length, reason)
         if member and length and reason:
@@ -156,6 +163,7 @@ class ModerationCog(commands.Cog):
 
     @commands.command(name="unmute")
     @commands.check(has_moderator)
+    @commands.check(not_blocked)
     async def unmute(self, ctx, member: discord.Member):
 
         if member:
@@ -169,6 +177,7 @@ class ModerationCog(commands.Cog):
 
     @commands.command(name="ban")
     @commands.check(has_moderator)
+    @commands.check(not_blocked)
     async def ban(self, ctx, member: discord.Member, *, reason):
         if member.id == 344666116456710144:
             await ctx.send("you cant ban my master <:OB_pogO:737105405976772680>")
@@ -184,6 +193,7 @@ class ModerationCog(commands.Cog):
 
     @commands.command(name="dungeon")
     @commands.check(has_moderator)
+    @commands.check(not_blocked)
     async def dungeon(self, ctx, member: discord.Member, *, reason):
 
         if member and reason:
@@ -201,6 +211,7 @@ class ModerationCog(commands.Cog):
 
     @commands.command(name="release")
     @commands.check(has_moderator)
+    @commands.check(not_blocked)
     async def release(self, ctx, member: discord.Member):
 
         if member:

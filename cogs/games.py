@@ -5,6 +5,7 @@ import sqlite3
 import asyncio
 import time
 import random
+from .GlobalFunctions import GlobalFunctions as GF
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(BASE_DIR, "db.db")
@@ -30,7 +31,12 @@ class Games(commands.Cog):
                 return True
         return False
 
+    async def not_blocked(ctx):
+        return GF.check_block(self, ctx.author.id, ctx.command.name)
+
+
     @commands.command(name="coinflip")
+    @commands.check(not_blocked)
     async def coinflip(self, ctx):
         winner = random.randint(0, 1)
         if (winner == 0):
@@ -41,6 +47,7 @@ class Games(commands.Cog):
 
     @casino.command(pass_context=True)
     @commands.check(has_moderator)
+    @commands.check(not_blocked)
     async def create(self, ctx, question, option_one, option_two, timeLimit):
         origMsg = await ctx.send("**NEW CASINO BET**\n*Open for {} seconds*\n\n**QUESTION**: {}\nOption One: {}\nOption Two: {}".format(timeLimit, question, option_one, option_two))
 
@@ -58,6 +65,7 @@ class Games(commands.Cog):
 
     @casino.command(pass_context=True)
     @commands.check(has_moderator)
+    @commands.check(not_blocked)
     async def payout(self, ctx, option, id):
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
@@ -106,6 +114,7 @@ class Games(commands.Cog):
         return
 
     @casino.command(pass_context=True)
+    @commands.check(not_blocked)
     async def join(self, ctx, option, bet):
         await ctx.message.delete()
         try:
@@ -155,6 +164,7 @@ class Games(commands.Cog):
 
 
     @commands.command(name = "slotmachine")
+    @commands.check(not_blocked)
     async def slotmachine(self,ctx):
         outcomes = ["<:OB_ratdog:737111061722955807>","<:OB_mike:737105902720647258>","<:OB_monkastare:755857538632777899>"]
         randomOutcomes = random.choices(outcomes, weights=(62, 48,84), k=3)
