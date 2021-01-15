@@ -32,7 +32,7 @@ class Games(commands.Cog):
         return False
 
     async def not_blocked(ctx):
-        return GF.check_block(self, ctx.author.id, ctx.command.name)
+        return GF.check_block(ctx.author.id, ctx.command.name)
 
 
     @commands.command(name="coinflip")
