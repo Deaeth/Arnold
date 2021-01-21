@@ -102,6 +102,7 @@ class ModerationCog(commands.Cog):
             date = row[4]
             reason = row[5]
             embed.add_field(name=row[3], value="Moderator: {}\nReason: {}\nDate: {}".format(moderator.name, reason, date), inline=False)
+        embed.add_field(name="Account Created", value=user.created_at, inline=False)
         embed.set_footer(text="Total Infractions: {}".format(len(rows)))
 
         await ctx.send(embed=embed)
@@ -151,7 +152,6 @@ class ModerationCog(commands.Cog):
 
             await ctx.message.delete()
             await ctx.send("{} has been muted for {}".format(member.mention, length))
-            await self.create_log(ctx.author, member, ctx.command.name, reason)
 
             await asyncio.sleep(self.get_length(length))
 
@@ -170,7 +170,6 @@ class ModerationCog(commands.Cog):
             role = get(member.guild.roles, name="Muted 🔗")
             await member.remove_roles(role, reason = "time's up ")
 
-            await self.create_log(ctx.author, member, ctx.command.name, None)
             await ctx.send("<@{}> has been unmuted!".format(member.id))
         else:
             ctx.send("The command is `$mute *user* *length* *reason*`")
@@ -189,7 +188,6 @@ class ModerationCog(commands.Cog):
             await ctx.send(str(x))
         await member.ban(reason=reason)
         await ctx.send("<a:CrabDance:776261171618643989> <a:CrabDance:776261171618643989> <a:CrabDance:776261171618643989> {} is banned! <a:CrabDance:776261171618643989> <a:CrabDance:776261171618643989> <a:CrabDance:776261171618643989>".format(member.name))
-        await self.create_log(ctx.author, member, ctx.command.name, reason)
 
     @commands.command(name="dungeon")
     @commands.check(has_moderator)
@@ -202,10 +200,7 @@ class ModerationCog(commands.Cog):
 
             await ctx.message.delete()
             await ctx.send("{} has been dungeoned".format(member.mention))
-            await self.create_log(ctx.author, member, ctx.command.name, reason)
 
-            dungeon = self.bot.get_channel(777217521429643277)
-            await dungeon.send("Welcome to the dungeon <@{}>, say hello to <@776124513866874920> <:OB_toph:776534087086768128>".format(member.id))
         else:
             ctx.send("The command is `$dungeon *user* *reason*`")
 
@@ -217,7 +212,6 @@ class ModerationCog(commands.Cog):
         if member:
             role = get(member.guild.roles, name="Dungeoned 🔗")
             await member.remove_roles(role, reason = "released")
-            await self.create_log(ctx.author, member, ctx.command.name, None)
 
             await ctx.send("<@{}> has been released!".format(member.id))
         else:

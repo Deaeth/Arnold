@@ -88,7 +88,6 @@ class UserCog(commands.Cog):
 
 
     @commands.command(name="roulette")
-    @commands.is_owner()
     @commands.check(not_blocked)
     async def roulette(self, ctx):
         roll = random.randint(1, 6)

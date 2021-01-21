@@ -60,6 +60,20 @@ class OwnerCog(commands.Cog):
         else:
             await ctx.send('**`SUCCESS`**')
 
+    @commands.command("based")
+    @commands.is_owner()
+    async def based(self, ctx, user: discord.Member):
+        role = dungoned = get(ctx.author.guild.roles, id=int(800213592933662770))
+        await user.add_roles(role, reason="they're based", atomic=True)
+
+        await ctx.send("{} has declared you based!".format(user.mention))
+
+    @commands.command("wenis")
+    @commands.is_owner()
+    async def wenis(self, ctx):
+        role = dungoned = get(ctx.author.guild.roles, id=int(774753944701894658))
+        await ctx.author.add_roles(role, reason="they're based", atomic=True)
+
     @commands.command("banrole")
     @commands.is_owner()
     async def banrole(self, ctx, roleId):
