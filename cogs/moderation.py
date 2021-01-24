@@ -22,16 +22,16 @@ class ModerationCog(commands.Cog):
         c.execute("INSERT INTO logs (user_id, moderator_id, action, reason, date) VALUES (?,?,?,?, ?)", (user.id, moderator.id, command, reason, date,))
         conn.commit()
 
-        image = user.avatar_url
-        embed = discord.Embed(title=command, timestamp=date, color=0x2403fc)
-        embed.set_thumbnail(url=image)
-        embed.add_field(name="Moderator", value=moderator, inline=True)
-        embed.add_field(name="User", value=user, inline=True)
-        embed.add_field(name="Reason", value=reason, inline=False)
+        #image = user.avatar_url
+        #embed = discord.Embed(title=command, timestamp=date, color=0x2403fc)
+        #embed.set_thumbnail(url=image)
+        #embed.add_field(name="Moderator", value=moderator, inline=True)
+        #embed.add_field(name="User", value=user, inline=True)
+        #embed.add_field(name="Reason", value=reason, inline=False)
 
 
-        channel = self.bot.get_channel(789724879809019904)
-        await channel.send(embed=embed)
+        #channel = self.bot.get_channel(789724879809019904)
+        #await channel.send(embed=embed)
 
 
 
@@ -93,11 +93,15 @@ class ModerationCog(commands.Cog):
                 await ctx.send("You need to mention the user or type their id")
                 return
 
-        user = self.bot.get_user(user_id)
-        image = user.avatar_url
-        embed = discord.Embed(title="Rapsheet for {}".format(user.name), color=0x2403fc)
+        try:
+            user = self.bot.get_user(user_id)
+            image = user.avatar_url
 
-        embed.set_thumbnail(url=image)
+            embed = discord.Embed(title="Rapsheet for {}".format(user.name), color=0x2403fc)
+
+            embed.set_thumbnail(url=image)
+        except:
+            embed = discord.Embed(title="Rapsheet for {}".format(user), color=0x2403fc)
 
         c.execute("SELECT * FROM logs WHERE user_id=?", (user_id,))
         rows = c.fetchall()
@@ -168,6 +172,8 @@ class ModerationCog(commands.Cog):
 
             await member.remove_roles(role, reason = "time's up ")
 
+            await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, reason)
+
         else:
             ctx.send("The command is `$mute *user* *length* *reason*`")
 
@@ -182,6 +188,9 @@ class ModerationCog(commands.Cog):
             await member.remove_roles(role, reason = "time's up ")
 
             await ctx.send("<@{}> has been unmuted!".format(member.id))
+
+            await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, "unmuted")
+
         else:
             ctx.send("The command is `$mute *user* *length* *reason*`")
 
@@ -198,6 +207,8 @@ class ModerationCog(commands.Cog):
             await asyncio.sleep(1)
             await ctx.send(str(x))
         await member.ban(reason=reason)
+        await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, reason)
+
         await ctx.send("<a:CrabDance:776261171618643989> <a:CrabDance:776261171618643989> <a:CrabDance:776261171618643989> {} is banned! <a:CrabDance:776261171618643989> <a:CrabDance:776261171618643989> <a:CrabDance:776261171618643989>".format(member.name))
 
     @commands.command(name="dungeon")
@@ -212,6 +223,8 @@ class ModerationCog(commands.Cog):
             await ctx.message.delete()
             await ctx.send("{} has been dungeoned".format(member.mention))
 
+            await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, reason)
+
         else:
             ctx.send("The command is `$dungeon *user* *reason*`")
 
@@ -225,6 +238,8 @@ class ModerationCog(commands.Cog):
             await member.remove_roles(role, reason = "released")
 
             await ctx.send("<@{}> has been released!".format(member.id))
+
+            await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, "released")
         else:
             ctx.send("The command is `$release *user*`")
 

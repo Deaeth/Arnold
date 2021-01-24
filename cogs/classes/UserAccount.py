@@ -35,6 +35,7 @@ class UserAccount:
 
         c.execute(sql, (self.id,))
         balance = c.fetchone()
+        conn.close()
         return balance
 
     def add_points(self, amount):
@@ -44,6 +45,7 @@ class UserAccount:
 
         c.execute(sql, (amount, self.id,))
         conn.commit()
+        conn.close()
 
     def blocked_commands(self):
         sql = "SELECT command FROM blocked WHERE user_id=?"
@@ -52,5 +54,6 @@ class UserAccount:
 
         c.execute(sql, (self.id,))
         rows = c.fetchall()
+        conn.close()
 
         return rows

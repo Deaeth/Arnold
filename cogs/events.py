@@ -4,6 +4,7 @@ import datetime
 import sqlite3
 import os
 import asyncio
+from discord.utils import get
 from .classes.UserAccount import UserAccount
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -48,13 +49,30 @@ class Events(commands.Cog):
             await asyncio.sleep(2)
             await msg.delete()
             return
-
-
+        print(err)
 
     @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        try:
+            if member.id ==344666116456710144 and after.channel == None:
+                voiceClient = get(self.bot.voice_clients, guild=before.channel.guild)
+                await voiceClient.disconnect()
+                return
+
+            channel = after.channel
+            voiceClient = get(self.bot.voice_clients, guild=channel.guild)
+            if voiceClient and voiceClient.is_connected():
+                await voiceClient.move_to(channel)
+            else:
+                vc = await channel.connect()
+        except:
+            return
+    @commands.Cog.listener()
     async def on_message(self, message):
-        user = UserAccount(message.author.id)
-        user.add_points(len(message.content.split()))
+        if not message.author.bot:
+            user = UserAccount(message.author.id)
+            user.add_points(len(message.content.split()))
+        return
 
 
     @commands.Cog.listener()
