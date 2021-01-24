@@ -109,6 +109,20 @@ class UserCog(commands.Cog):
         if ctx.invoked_subcommand is None:
             await ctx.send("Invalid use of money command")
 
+    @commands.command(name="leaderboard")
+    @commands.check(not_blocked)
+    async def leaderboard(self, ctx):
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+
+        c.execute("SELECT user_id, score FROM users ORDER BY score DESC LIMIT 5")
+        top = c.fetchall()
+
+        embed = discord.Embed(title="Leaderboard")
+        for user in top:
+            embed.add_field(name=self.bot.get_user(user[0]).name, value="Score: {}".format(user[1]), inline=False)
+        await ctx.send(embed=embed)
+
     @money.command(pass_context=True)
     @commands.check(not_blocked)
     async def balance(self, ctx):

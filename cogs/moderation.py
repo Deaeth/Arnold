@@ -64,7 +64,18 @@ class ModerationCog(commands.Cog):
 
     async def not_blocked(ctx):
         return GF.check_block(ctx.author.id, ctx.command.name)
-
+        #85,579
+    @commands.command(name="purge")
+    @commands.check(has_moderator)
+    @commands.check(not_blocked)
+    async def purge(self, ctx, amount: int):
+        if amount <= 100:
+            await ctx.channel.purge(limit=amount+1, bulk=True)
+            await ctx.send("Purged {}".format(amount))
+            return
+        msg = await ctx.send("Purge limit is 100")
+        await asyncio.sleep(2)
+        await msg.delete()
 
     @commands.command(name="rapsheet")
     @commands.check(has_moderator)

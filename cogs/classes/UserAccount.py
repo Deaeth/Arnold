@@ -37,6 +37,14 @@ class UserAccount:
         balance = c.fetchone()
         return balance
 
+    def add_points(self, amount):
+        sql = "UPDATE users SET score = score + ? WHERE user_id=?"
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+
+        c.execute(sql, (amount, self.id,))
+        conn.commit()
+
     def blocked_commands(self):
         sql = "SELECT command FROM blocked WHERE user_id=?"
         conn = sqlite3.connect(db_path)

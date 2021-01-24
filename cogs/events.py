@@ -3,6 +3,8 @@ import discord
 import datetime
 import sqlite3
 import os
+import asyncio
+from .classes.UserAccount import UserAccount
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(BASE_DIR, "db.db")
@@ -38,6 +40,22 @@ class Events(commands.Cog):
         print('ID:', self.bot.user.id)
         print("Guilds: ", self.bot.guils)
         print()
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            msg = await ctx.send("You're on cooldown")
+            await asyncio.sleep(2)
+            await msg.delete()
+            return
+
+
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        user = UserAccount(message.author.id)
+        user.add_points(len(message.content.split()))
+
 
     @commands.Cog.listener()
     async def on_member_join(self, member):

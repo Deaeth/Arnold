@@ -73,7 +73,7 @@ class Games(commands.Cog):
         id = int(id)
         option = int(option)
 
-        await ctx.delete()
+        await ctx.message.delete()
 
         c.execute("SELECT * FROM bets WHERE option=1")
         option_one = c.fetchall()
