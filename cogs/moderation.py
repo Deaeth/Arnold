@@ -71,7 +71,9 @@ class ModerationCog(commands.Cog):
     async def purge(self, ctx, amount: int):
         if amount <= 100:
             await ctx.channel.purge(limit=amount+1, bulk=True)
-            await ctx.send("Purged {}".format(amount))
+            msg = await ctx.send("Purged {}".format(amount))
+            await asyncio.sleep(2)
+            await msg.delete()
             return
         msg = await ctx.send("Purge limit is 100")
         await asyncio.sleep(2)

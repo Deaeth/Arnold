@@ -6,6 +6,7 @@ import asyncio
 import time
 import random
 from .GlobalFunctions import GlobalFunctions as GF
+from discord.utils import get
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(BASE_DIR, "db.db")
@@ -57,10 +58,17 @@ class Games(commands.Cog):
         c.execute("INSERT INTO casino (casino_id, status) VALUES (?,?)", (ctx.author.id,"active",))
         conn.commit()
 
+        category = ctx.channel.category
+        role = get(ctx.guild.roles, id=774757716320452618)
+        await category.set_permissions(role, view_channel=True )
+
         await asyncio.sleep(int(timeLimit))
         await origMsg.edit(content="**NEW CASINO BET**\n*Casino is closed*\n\n**QUESTION**: {}\nOption One: {}\nOption Two: {}".format(question, option_one, option_two))
         c.execute("UPDATE casino SET status=? WHERE casino_id=?", ("inactive",ctx.author.id))
         conn.commit()
+
+
+
         return
 
     @casino.command(pass_context=True)
@@ -87,7 +95,7 @@ class Games(commands.Cog):
                 await ctx.send("No one voted for this one!")
                 return
             else:
-                multiplier = (100 - ((len(option_one) / (len(option_one) + len(option_two))) * 100)) / 100 + 1
+                multiplier = round((1 - len(option_one) / len(option_two)) * 10, 2)
                 for row in option_one:
                     print(row, row[2], row[4])
                     user_id = row[2]
@@ -99,7 +107,7 @@ class Games(commands.Cog):
                 await ctx.send("No one voted for this one!")
                 return
             else:
-                multiplier = (100 - ((len(option_two) / (len(option_one) + len(option_two))) * 100)) / 100 + 1
+                multiplier = round((1 - len(option_two) / len(option_round)) * 10, 2)
                 for row in option_two:
                     user_id = row[2]
                     bet = row[4]
@@ -110,7 +118,7 @@ class Games(commands.Cog):
         c.execute("DELETE FROM bets")
         conn.commit()
 
-        await ctx.send("OPTION {} HAS WON WITH A MULTIPLIER OF {}".format(option, multiplier))
+        await ctx.send("OPTION {} HAS WON WITH A MULTIPLIER OF {}".format(option, round(multiplier)))
         return
 
     @casino.command(pass_context=True)
@@ -162,6 +170,15 @@ class Games(commands.Cog):
         await msg.delete()
         return
 
+
+
+    @casino.command(pass_context=True)
+    @commands.check(has_moderator)
+    @commands.check(not_blocked)
+    async def close(self, ctx):
+        category = ctx.channel.category
+        role = get(ctx.guild.roles, id=774757716320452618)
+        await category.set_permissions(role, view_channel=False )
 
     @commands.command(name = "slotmachine")
     @commands.check(not_blocked)

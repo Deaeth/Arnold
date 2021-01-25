@@ -26,7 +26,17 @@ class Economy(commands.Cog):
         await ctx.send("You just worked for 100 coins, nice")
         return
 
-
+    @commands.command(name="give")
+    @commands.cooldown(1, (10), commands.BucketType.user)
+    async def give(self, ctx, user: discord.Member, amount: int):
+        sender = UserAccount(ctx.author.id)
+        reciever = UserAccount(user.id)
+        if (sender.get_balance()) >= amount:
+            sender.change_money(amount, "subtract")
+            reciever.change_money(amount, "add")
+            await ctx.send("Your transaction was successful")
+        else:
+            await ctx.send("You don't have {}".format(amount))
 
 
 

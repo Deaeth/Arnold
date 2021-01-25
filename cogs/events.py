@@ -4,6 +4,7 @@ import datetime
 import sqlite3
 import os
 import asyncio
+import requests
 from discord.utils import get
 from .classes.UserAccount import UserAccount
 
@@ -35,12 +36,49 @@ class Events(commands.Cog):
         channel = self.bot.get_channel(789724879809019904)
         await channel.send(embed=embed)
 
+    @commands.Cog.listener()
     async def on_ready(self):
         print('Ready!')
         print('Logged in as ---->', self.bot.user)
         print('ID:', self.bot.user.id)
-        print("Guilds: ", self.bot.guils)
         print()
+
+        game = discord.Game("with the ban command!")
+        await self.bot.change_presence(status=discord.Status.idle, activity=game)
+
+        news_channel = self.bot.get_channel(803014275445948436)
+
+        url = "https://newscatcher.p.rapidapi.com/v1/latest_headlines"
+
+        querystring = {"lang":"en","media":"True"}
+
+        headers = {
+            'x-rapidapi-key': "96a071e9fdmsh57907bfaf371ddap156ac1jsn94803889484b",
+            'x-rapidapi-host': "newscatcher.p.rapidapi.com"
+            }
+        print("requesting")
+
+        while True:
+            try:
+                articles = []
+                response = requests.request("GET", url, headers=headers, params=querystring)
+                articles = response.json()["articles"]
+                for article in articles:
+                    embed = discord.Embed(title=article["title"], colour=0xc7e6a7, timestamp=datetime.datetime.strptime(article["published_date"], "%Y-%m-%d %H:%M:%S"))
+                    embed.add_field(name="Summary", value=article["summary"][0:250] + "...", inline=False)
+                    embed.add_field(name="Link", value="[Source]({})".format(article["link"]))
+
+                    if article["media_content"] != None:
+                        embed.set_thumbnail(url=article["media_content"])
+
+                    await news_channel.send(embed=embed)
+                    await asyncio.sleep(60*5)
+            except Exception as e:
+                print(e)
+                pass
+
+            await asyncio.sleep(60*5)
+
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
@@ -49,7 +87,7 @@ class Events(commands.Cog):
             await asyncio.sleep(2)
             await msg.delete()
             return
-        print(err)
+        print(error)
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
@@ -58,13 +96,13 @@ class Events(commands.Cog):
                 voiceClient = get(self.bot.voice_clients, guild=before.channel.guild)
                 await voiceClient.disconnect()
                 return
-
-            channel = after.channel
-            voiceClient = get(self.bot.voice_clients, guild=channel.guild)
-            if voiceClient and voiceClient.is_connected():
-                await voiceClient.move_to(channel)
-            else:
-                vc = await channel.connect()
+            if member.id ==344666116456710144:
+                channel = after.channel
+                voiceClient = get(self.bot.voice_clients, guild=channel.guild)
+                if voiceClient and voiceClient.is_connected():
+                    await voiceClient.move_to(channel)
+                else:
+                    vc = await channel.connect()
         except:
             return
     @commands.Cog.listener()

@@ -7,6 +7,7 @@ import os.path
 import wikipediaapi
 import json
 from .GlobalFunctions import GlobalFunctions as GF
+from discord.utils import get
 
 from discord.ext import commands
 
@@ -43,6 +44,43 @@ class UserCog(commands.Cog):
                     response = response + " " + str(emoji)
         await ctx.send(response)
         await ctx.message.delete()
+
+    @commands.command(name="pomodoro")
+    @commands.check(not_blocked)
+    async def pomodoro(self, ctx, cycles: int):
+        user = UserAccount(ctx.author.id)
+        for x in range(cycles):
+            breakTime = 0
+            pomRole = get(ctx.guild.roles, name="Pomodoro 🍅")
+            adminRoles = []
+
+            user.add_pomodoro(1)
+            await ctx.send("Starting cycle {} 25 minutes".format(str(x+1)))
+
+            await ctx.author.add_roles(pomRole, reason="Pomodoro", atomic=True)
+
+            for role in ctx.author.roles:
+                if role.permissions.administrator:
+                    try:
+                        await ctx.author.remove_roles(role, reason="Pomodoro Block")
+                        adminRoles.append(role)
+                    except:
+                        continue
+
+            await asyncio.sleep(10)
+
+            await ctx.author.remove_roles(pomRole, reason="Pomodoro", atomic=True)
+
+            for role in adminRoles:
+                await ctx.author.add_roles(role, reason="Pomodoro Unblock", atomic=True)
+
+            if x % 4 == 0:
+                breakTime = 60 * 25
+                await ctx.send("Starting break {} (25 minutes)".format(str(x+1)))
+
+            breakTime = 60 * 5
+            await ctx.send("Starting break {} (5 minutes)".format(str(x+1)))
+            await asyncio.sleep(breakTime)
 
     @commands.command(name="wiki")
     @commands.check(not_blocked)
@@ -111,17 +149,20 @@ class UserCog(commands.Cog):
 
     @commands.command(name="leaderboard")
     @commands.check(not_blocked)
-    async def leaderboard(self, ctx):
+    async def leaderboard(self, ctx, type):
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
 
-        c.execute("SELECT user_id, score FROM users ORDER BY score DESC LIMIT 5")
-        top = c.fetchall()
+        try:
+            c.execute("SELECT user_id, {} FROM users ORDER BY {} DESC LIMIT 5".format(type, type))
+            top = c.fetchall()
 
-        embed = discord.Embed(title="Leaderboard")
-        for user in top:
-            embed.add_field(name=self.bot.get_user(user[0]).name, value="Score: {}".format(user[1]), inline=False)
-        await ctx.send(embed=embed)
+            embed = discord.Embed(title="Leaderboard for {}".format(type))
+            for user in top:
+                embed.add_field(name=self.bot.get_user(user[0]).name, value="Amount: {}".format(user[1]), inline=False)
+            await ctx.send(embed=embed)
+        except sqlite3.OperationalError:
+            await ctx.send("There is no leaderboard for that type")
 
     @money.command(pass_context=True)
     @commands.check(not_blocked)

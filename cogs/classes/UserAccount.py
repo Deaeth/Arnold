@@ -34,12 +34,22 @@ class UserAccount:
         c = conn.cursor()
 
         c.execute(sql, (self.id,))
-        balance = c.fetchone()
+        balance = c.fetchone()[0]
+        print(balance)
         conn.close()
         return balance
 
     def add_points(self, amount):
         sql = "UPDATE users SET score = score + ? WHERE user_id=?"
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+
+        c.execute(sql, (round(amount), self.id,))
+        conn.commit()
+        conn.close()
+
+    def add_pomodoro(self, amount):
+        sql = "UPDATE users SET pomodoro = pomodoro + ? WHERE user_id=?"
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
 
