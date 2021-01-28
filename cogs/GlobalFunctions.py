@@ -1,4 +1,5 @@
 from .classes.UserAccount import UserAccount
+import json
 
 class GlobalFunctions:
     def __init__(self):
@@ -14,3 +15,7 @@ class GlobalFunctions:
                 return False
         else:
             return True
+
+    def get_value(key):
+        with open("C:/Users/frogg/Desktop/Arnold/cogs/hidden.json") as f:
+            return json.load(f)[key]

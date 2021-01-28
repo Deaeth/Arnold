@@ -262,12 +262,35 @@ class OwnerCog(commands.Cog):
         c.execute("SELECT * FROM suggestions WHERE id=?", (id,))
         suggestion = c.fetchone()
 
-        c.execute("UPDATE suggestions SET status=? WHERE id=?", ("complete", id,))
-        conn.commit()
-        conn.close()
+        if suggestion:
+            c.execute("UPDATE suggestions SET status=? WHERE id=?", ("complete", id,))
+            conn.commit()
+            conn.close()
 
-        await ctx.send("{} your suggestion of '{}' is complete!".format(self.bot.get_user(suggestion[1]).mention, suggestion[2]))
-        return
+            await ctx.send("{} your suggestion of '{}' is complete!".format(self.bot.get_user(suggestion[1]).mention, suggestion[2]))
+            return
+        else:
+            await ctx.send("Suggestion doesn't exist")
+    @suggestions.command(pass_context=True)
+    @commands.is_owner()
+    async def delete(self, ctx, id: int):
+        await ctx.message.delete()
+
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+
+        c.execute("SELECT * FROM suggestions WHERE id=?", (id,))
+        suggestion = c.fetchone()
+
+        if suggestion:
+            c.execute("DELETE FROM suggestions WHERE id=?", (id,))
+            conn.commit()
+            conn.close()
+
+            await ctx.send("{} your suggestion of '{}' was deleted! <:OB_mike:737105902720647258>".format(self.bot.get_user(suggestion[1]).mention, suggestion[2]))
+            return
+        else:
+            await ctx.send("Suggestion doesn't exist")
 
 
 

@@ -6,6 +6,7 @@ import sqlite3
 import os.path
 import wikipediaapi
 import json
+import praw
 from .GlobalFunctions import GlobalFunctions as GF
 from discord.utils import get
 
@@ -124,6 +125,23 @@ class UserCog(commands.Cog):
 
             await ctx.send(embed=embed)
 
+    @commands.command(name="meme")
+    @commands.check(not_blocked)
+    async def meme(self, ctx):
+        secret = GF.get_value("reddit-secret")
+        id = GF.get_value("reddit-personal")
+
+        reddit = praw.Reddit(client_id=id, client_secret=secret, user_agent="Retrieves top posts from meme subreddits")
+
+        meme = reddit.subreddit("dankmemes").random()
+
+        embed = discord.Embed(title=meme.title, url="https://reddit.com{}".format(meme.permalink), colour=0xc7e6a7)
+        embed.set_image(url=meme.url)
+        await ctx.send(embed=embed)
+        
+        return
+
+
 
     @commands.command(name="roulette")
     @commands.check(not_blocked)
@@ -201,7 +219,6 @@ class UserCog(commands.Cog):
             embed.add_field(name="Team 2", value="<@{}>".format(str(match[3])), inline=True)
             embed.add_field(name="\u200b", value="\u200b", inline=False)
         await ctx.send(embed=embed)
-
 
     @tourney.command(pass_context=True)
     @commands.check(not_blocked)

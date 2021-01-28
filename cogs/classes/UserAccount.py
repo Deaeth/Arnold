@@ -18,7 +18,7 @@ class UserAccount:
 
         if type == "add":
             sql = "UPDATE users SET balance = balance + ? WHERE user_id=?"
-        elif type == "subtract":
+        elif type == "remove":
             sql = "UPDATE users SET balance = balance - ? WHERE user_id=?"
         else:
             return
@@ -38,6 +38,64 @@ class UserAccount:
         print(balance)
         conn.close()
         return balance
+
+    def change_stock(self, ticker, amount, type):
+        sql = ""
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+
+        c.execute("SELECT * FROM portfolio WHERE user_id=? AND ticker=?", (self.id, ticker,))
+        row = c.fetchone()
+
+        if row:
+            if type == "buy":
+                c.execute("UPDATE portfolio SET shares=shares+? WHERE user_id=? AND ticker=?", (amount, self.id, ticker,))
+            elif type == "sell":
+                c.execute("UPDATE portfolio SET shares=shares-? WHERE user_id=? AND ticker=?", (amount, self.id, ticker,))
+                conn.commit()
+                shares = self.get_stock(ticker)
+                print(shares)
+                if shares == 0:
+                    c.execute("DELETE FROM portfolio WHERE user_id=? AND ticker=?", (self.id, ticker,))
+
+            conn.commit()
+            conn.close()
+            return
+        if type == "buy":
+            c.execute("INSERT INTO portfolio (ticker, shares, user_id) VALUES (?,?,?)", (ticker, amount, self.id,))
+            conn.commit()
+            return
+        return "You do not own that stock"
+
+    def get_stock(self, ticker):
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+
+        c.execute("SELECT shares FROM portfolio WHERE user_id=? and ticker=?", (self.id, ticker,))
+        shares = c.fetchone()[0]
+
+        return shares
+
+
+    def get_portfolio(self, page=None):
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+
+        if page == None:
+            c.execute("SELECT ticker, shares FROM portfolio WHERE user_id=? ORDER BY id ASC LIMIT 5", (self.id,))
+            stocks = c.fetchall()
+            return stocks
+
+        index = (page-1)*5
+        print(index)
+
+        c.execute("SELECT ticker, shares FROM portfolio WHERE user_id=? ORDER BY id ASC LIMIT 5 OFFSET ?", (self.id, index,))
+        stocks = c.fetchall()
+
+        return stocks
+
+
+
 
     def add_points(self, amount):
         sql = "UPDATE users SET score = score + ? WHERE user_id=?"

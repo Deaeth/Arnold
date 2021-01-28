@@ -95,7 +95,10 @@ class Games(commands.Cog):
                 await ctx.send("No one voted for this one!")
                 return
             else:
-                multiplier = round((1 - len(option_one) / len(option_two)) * 10, 2)
+                try:
+                    multiplier = round((1 - len(option_one) / len(option_two)) * 10, 2)
+                except:
+                    multiplier = 1
                 for row in option_one:
                     print(row, row[2], row[4])
                     user_id = row[2]
@@ -107,7 +110,10 @@ class Games(commands.Cog):
                 await ctx.send("No one voted for this one!")
                 return
             else:
-                multiplier = round((1 - len(option_two) / len(option_round)) * 10, 2)
+                try:
+                    multiplier = round((1 - len(option_two) / len(option_one)) * 10, 2)
+                except:
+                    multiplier = 1  
                 for row in option_two:
                     user_id = row[2]
                     bet = row[4]
