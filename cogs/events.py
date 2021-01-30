@@ -86,7 +86,11 @@ class Events(commands.Cog):
             msg = await ctx.send("You're on cooldown")
             await asyncio.sleep(2)
             await msg.delete()
-            return
+        if isinstance(error, commands.MissingRequiredArgument):
+            try:
+                await ctx.send(ctx.command)
+            except:
+                await ctx.send(ctx.invoked_subcommand)
         print(error)
 
     @commands.Cog.listener()

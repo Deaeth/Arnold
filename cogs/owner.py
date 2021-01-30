@@ -156,6 +156,14 @@ class OwnerCog(commands.Cog):
         channel = self.bot.get_channel(774766074675200020)
         await channel.connect()
 
+    @commands.command(name='create', hidden=True)
+    @commands.is_owner()
+    async def create(self, ctx, name, colour):
+        role = await ctx.guild.create_role(name=name)
+        await role.edit(color=int(colour, 16))
+        await ctx.send(f"Role {name} was created")
+        return
+
     @commands.command(name='voice', hidden=True)
     @commands.is_owner()
     async def voice(self, ctx):

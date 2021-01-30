@@ -161,40 +161,35 @@ class ModerationCog(commands.Cog):
     @commands.check(has_moderator)
     @commands.check(not_blocked)
     async def mute(self, ctx, member: discord.Member, length, *, reason):
-        print(member, length, reason)
-        if member and length and reason:
+        role_id = await GF.get_id(ctx.guild, "mute")
+        role = get(member.guild.roles, id=role_id)
 
-            role = get(member.guild.roles, name="Muted 🔗")
-            await member.add_roles(role, reason=reason, atomic=True)
+        await member.add_roles(role, reason=reason, atomic=True)
 
-            await ctx.message.delete()
-            await ctx.send("{} has been muted for {}".format(member.mention, length))
+        await ctx.message.delete()
+        await ctx.send("{} has been muted for {}".format(member.mention, length))
 
-            await asyncio.sleep(self.get_length(length))
+        await asyncio.sleep(self.get_length(length))
 
-            await member.remove_roles(role, reason = "time's up ")
+        await member.remove_roles(role, reason = "time's up ")
 
-            await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, reason)
-
-        else:
-            ctx.send("The command is `$mute *user* *length* *reason*`")
+        await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, reason)
 
 
     @commands.command(name="unmute")
     @commands.check(has_moderator)
     @commands.check(not_blocked)
     async def unmute(self, ctx, member: discord.Member):
+        role_id = await GF.get_id(ctx.guild, "mute")
+        role = get(member.guild.roles, id=role_id)
 
-        if member:
-            role = get(member.guild.roles, name="Muted 🔗")
-            await member.remove_roles(role, reason = "time's up ")
+        role = get(member.guild.roles, name="Muted 🔗")
+        await member.remove_roles(role, reason = "time's up ")
 
-            await ctx.send("<@{}> has been unmuted!".format(member.id))
+        await ctx.send("<@{}> has been unmuted!".format(member.id))
 
-            await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, "unmuted")
+        await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, "unmuted")
 
-        else:
-            ctx.send("The command is `$mute *user* *length* *reason*`")
 
     @commands.command(name="ban")
     @commands.check(has_moderator)
@@ -217,33 +212,30 @@ class ModerationCog(commands.Cog):
     @commands.check(has_moderator)
     @commands.check(not_blocked)
     async def dungeon(self, ctx, member: discord.Member, *, reason):
+        role_id = await GF.get_id(ctx.guild, "dungeon")
+        role = get(member.guild.roles, id=role_id)
 
-        if member and reason:
-            role = get(member.guild.roles, name="Dungeoned 🔗")
-            await member.add_roles(role, reason=reason, atomic=True)
+        await member.add_roles(role, reason=reason, atomic=True)
 
-            await ctx.message.delete()
-            await ctx.send("{} has been dungeoned".format(member.mention))
+        await ctx.message.delete()
+        await ctx.send("{} has been dungeoned".format(member.mention))
 
-            await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, reason)
+        await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, reason)
 
-        else:
-            ctx.send("The command is `$dungeon *user* *reason*`")
 
     @commands.command(name="release")
     @commands.check(has_moderator)
     @commands.check(not_blocked)
     async def release(self, ctx, member: discord.Member):
+        role_id = await GF.get_id(ctx.guild, "dungeon")
+        role = get(member.guild.roles, id=role_id)
 
-        if member:
-            role = get(member.guild.roles, name="Dungeoned 🔗")
-            await member.remove_roles(role, reason = "released")
+        await member.remove_roles(role, reason = "released")
 
-            await ctx.send("<@{}> has been released!".format(member.id))
+        await ctx.send("<@{}> has been released!".format(member.id))
 
-            await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, "released")
-        else:
-            ctx.send("The command is `$release *user*`")
+        await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, "released")
+
 
 def setup(bot):
     bot.add_cog(ModerationCog(bot))
