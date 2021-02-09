@@ -10,6 +10,7 @@ from .classes.UserAccount import UserAccount
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(BASE_DIR, "db.db")
+print("PATH: ", db_path)
 
 class Events(commands.Cog):
     def __init__(self, bot):
@@ -87,11 +88,12 @@ class Events(commands.Cog):
             await asyncio.sleep(2)
             await msg.delete()
         if isinstance(error, commands.MissingRequiredArgument):
-            try:
-                await ctx.send(ctx.command)
-            except:
-                await ctx.send(ctx.invoked_subcommand)
-        print(error)
+            msg = f"${ctx.command}"
+
+            for key, value in ctx.command.clean_params.items():
+                msg = msg + f" <{key}>"
+
+            await ctx.send(f"The proper command is `{msg}`")
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
@@ -132,6 +134,32 @@ class Events(commands.Cog):
 
         c.execute("INSERT INTO users (user_id) VALUES (?)", (member.id,))
         conn.commit()
+
+        return
+
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild):
+        print(f"joined {guild.name}")
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+
+        c.execute("SELECT * FROM servers WHERE server_id=?", (guild.id,))
+
+        if not c.fetchone():
+            c.execute("INSERT INTO servers (server_id, prefix) VALUES (?,?)", (guild.id, '$',))
+            conn.commit()
+
+        for member in guild.members:
+            print(member.name)
+
+            member_account = await self.get_user(member.id)
+            print(member_account)
+            if not member_account == None:
+                continue
+
+            print(f"doesnt exist {member.name}")
+            c.execute("INSERT INTO users (user_id) VALUES (?)", (member.id,))
+            conn.commit()
 
         return
 

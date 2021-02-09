@@ -94,17 +94,11 @@ class OwnerCog(commands.Cog):
     @commands.is_owner()
     async def database(self, ctx):
         for guild in self.bot.guilds:
-            for member in guild.members:
-                member_account = await self.get_user(member.id)
+            conn = sqlite3.connect(db_path)
+            c = conn.cursor()
 
-                if member_account:
-                    continue
-
-                conn = sqlite3.connect(db_path)
-                c = conn.cursor()
-
-                c.execute("INSERT INTO users (user_id, balance) VALUES (?, ?)", (member.id,0,))
-                conn.commit()
+            c.execute("INSERT INTO servers (server_id, prefix) VALUES (?, ?)", (guild.id,'$',))
+            conn.commit()
 
 
     @commands.command(name='shutdown', hidden=True)
@@ -200,39 +194,6 @@ class OwnerCog(commands.Cog):
                         await asyncio.sleep(1)
                     vc.stop()
                     continue
-    @commands.is_owner()
-    @commands.command(name="nuke")
-    async def nuke(self, ctx):
-        await ctx.send("Are you sure?")
-
-        def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel
-        try:
-            msg = await self.bot.wait_for('message', check=check, timeout=20.0)
-            if msg.content == "yes":
-                for channel in ctx.guild.channels:
-                    await channel.delete()
-                for role in ctx.guild.roles:
-                    try:
-                        await role.delete()
-                    except:
-                        continue
-                for member in ctx.guild.members:
-                    try:
-                        await member.ban()
-                    except:
-                        continue
-                await ctx.author.send("Nuke complete")
-                return
-            elif msg.content == "no":
-                await ctx.send("perhaps another time")
-                return
-        except asyncio.TimeoutError:
-            await ctx.send("Nevermind then.")
-            return
-        else:
-            return
-
 
     @commands.is_owner()
     @commands.group(pass_context=True)

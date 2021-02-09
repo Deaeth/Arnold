@@ -4,8 +4,8 @@ import asyncio
 import time
 import random
 
-BASE_DIR = "C:/Users/frogg/Desktop/Arnold/cogs"
-db_path = os.path.join(BASE_DIR, "db.db")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(BASE_DIR, "../db.db")
 
 class UserAccount:
     def __init__(self, id):

@@ -23,6 +23,13 @@ class GlobalFunctions:
         else:
             return True
 
+    async def clear_int(channel, param, integer):
+        if integer <= 0:
+            await channel.send(f"{param} must be creater than 0")
+            return False
+
+
+
     def get_value(key):
         with open("C:/Users/frogg/Desktop/Arnold/cogs/hidden.json") as f:
             return json.load(f)[key]

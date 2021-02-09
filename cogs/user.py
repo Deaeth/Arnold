@@ -138,7 +138,7 @@ class UserCog(commands.Cog):
         embed = discord.Embed(title=meme.title, url="https://reddit.com{}".format(meme.permalink), colour=0xc7e6a7)
         embed.set_image(url=meme.url)
         await ctx.send(embed=embed)
-        
+
         return
 
 
@@ -165,8 +165,8 @@ class UserCog(commands.Cog):
         if ctx.invoked_subcommand is None:
             await ctx.send("Invalid use of money command")
 
-    @commands.command(name="leaderboard")
-    @commands.check(not_blocked)
+    #@commands.command(name="leaderboard")
+    #@commands.check(not_blocked)
     async def leaderboard(self, ctx, type):
         conn = sqlite3.connect(db_path)
         c = conn.cursor()

@@ -5,6 +5,7 @@ import sqlite3
 import asyncio
 import time
 import random
+from .classes.UserAccount import UserAccount
 from .GlobalFunctions import GlobalFunctions as GF
 from discord.utils import get
 
@@ -113,7 +114,7 @@ class Games(commands.Cog):
                 try:
                     multiplier = round((1 - len(option_two) / len(option_one)) * 10, 2)
                 except:
-                    multiplier = 1  
+                    multiplier = 1
                 for row in option_two:
                     user_id = row[2]
                     bet = row[4]
@@ -129,15 +130,9 @@ class Games(commands.Cog):
 
     @casino.command(pass_context=True)
     @commands.check(not_blocked)
-    async def join(self, ctx, option, bet):
+    async def join(self, ctx, option: int, bet: int):
         await ctx.message.delete()
-        try:
-            option = int(option)
-            bet = int(bet)
-        except Exception:
-            msg = await ctx.send("Your choice and bet must be integers")
-            await asyncio.sleep(3)
-            await msg.delete()
+        if bet <= 0:
             return
 
         if option != 1 and option != 2:
@@ -188,12 +183,25 @@ class Games(commands.Cog):
 
     @commands.command(name = "slotmachine")
     @commands.check(not_blocked)
-    async def slotmachine(self,ctx):
+    async def slotmachine(self, ctx, bet: int):
+        if bet <= 0:
+            return
+
+        user = UserAccount(ctx.author.id)
+        if user.get_balance() < bet:
+            msg = await ctx.send("You dont have enough")
+            await asyncio.sleep(2)
+            await msg.delete()
+            return
+        user.change_money(bet, "remove")
+
         outcomes = ["<:OB_ratdog:737111061722955807>","<:OB_mike:737105902720647258>","<:OB_monkastare:755857538632777899>"]
         randomOutcomes = random.choices(outcomes, weights=(62, 48,84), k=3)
         msg = ""
-        if randomOutcomes[0] == randomOutcomes[1] == randomOutcomes[2]:
-            msg = "**YOU WIN!**" + " " + "<:OB_hasCapital:790800758207021126> <a:OB_winetime:796556837981257778>"
+
+        if (randomOutcomes[0] == randomOutcomes[1] == randomOutcomes[2]):
+            msg = f"**YOU WIN {bet*5} coins**" + " " + "<:OB_hasCapital:790800758207021126> <a:OB_winetime:796556837981257778>"
+            user.change_money(bet*5, "add")
         else:
             msg = "**LOSER!**" + " " + "<:OB_bebela:737110263836311733> <a:OB_teatime:737109485302055003>"
         message = await ctx.send("❎❎❎")

@@ -65,6 +65,7 @@ class ModerationCog(commands.Cog):
     async def not_blocked(ctx):
         return GF.check_block(ctx.author.id, ctx.command.name)
         #85,579
+
     @commands.command(name="purge")
     @commands.check(has_moderator)
     @commands.check(not_blocked)
@@ -173,7 +174,7 @@ class ModerationCog(commands.Cog):
 
         await member.remove_roles(role, reason = "time's up ")
 
-        await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, reason)
+        #await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, reason)
 
 
     @commands.command(name="unmute")
@@ -183,12 +184,11 @@ class ModerationCog(commands.Cog):
         role_id = await GF.get_id(ctx.guild, "mute")
         role = get(member.guild.roles, id=role_id)
 
-        role = get(member.guild.roles, name="Muted 🔗")
         await member.remove_roles(role, reason = "time's up ")
 
         await ctx.send("<@{}> has been unmuted!".format(member.id))
 
-        await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, "unmuted")
+        #await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, "unmuted")
 
 
     @commands.command(name="ban")
@@ -204,7 +204,7 @@ class ModerationCog(commands.Cog):
             await asyncio.sleep(1)
             await ctx.send(str(x))
         await member.ban(reason=reason)
-        await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, reason)
+        #await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, reason)
 
         await ctx.send("<a:CrabDance:776261171618643989> <a:CrabDance:776261171618643989> <a:CrabDance:776261171618643989> {} is banned! <a:CrabDance:776261171618643989> <a:CrabDance:776261171618643989> <a:CrabDance:776261171618643989>".format(member.name))
 
@@ -220,7 +220,7 @@ class ModerationCog(commands.Cog):
         await ctx.message.delete()
         await ctx.send("{} has been dungeoned".format(member.mention))
 
-        await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, reason)
+        #await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, reason)
 
 
     @commands.command(name="release")
@@ -234,7 +234,7 @@ class ModerationCog(commands.Cog):
 
         await ctx.send("<@{}> has been released!".format(member.id))
 
-        await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, "released")
+        #await create_log(ctx.author.id, member.id, ctx.invoked_subcommand, "released")
 
 
 def setup(bot):

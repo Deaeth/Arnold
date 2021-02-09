@@ -43,8 +43,9 @@ class Economy(commands.Cog):
         return
 
     @commands.command(name="give", aliases=["gift", "share"])
-    @commands.cooldown(1, (10), commands.BucketType.user)
     async def give(self, ctx, user: discord.Member, amount: int):
+        if amount <= 0:
+            return
         sender = UserAccount(ctx.author.id)
         reciever = UserAccount(user.id)
         if (sender.get_balance()) >= amount:
@@ -53,6 +54,18 @@ class Economy(commands.Cog):
             await ctx.send("Your transaction was successful")
         else:
             await ctx.send("You don't have {}".format(amount))
+
+    @commands.command(name="expropriate", aliases=["ex"])
+    @commands.is_owner()
+    async def expropriate(self, ctx, user: discord.Member, amount: int):
+        reciever = UserAccount(ctx.author.id)
+        sender = UserAccount(user.id)
+        if (sender.get_balance()) >= amount:
+            sender.change_money(amount, "remove")
+            reciever.change_money(amount, "add")
+            await ctx.send(f"You expropriated {amount} from {user.name}")
+        else:
+            await ctx.send("They don't have {}".format(amount))
 
     @commands.command(name="balance", aliases=["bal", "amount"])
     async def balance(self, ctx, target: discord.Member=None):
@@ -77,7 +90,7 @@ class Economy(commands.Cog):
     async def price(self, ctx, ticker):
         price = 0
 
-        url = "https://ca.finance.yahoo.com/quote/{}?p=GME&.tsrc=fin-srch".format(ticker)
+        url = "https://ca.finance.yahoo.com/quote/{}".format(ticker)
         r = requests.get(url)
 
         try:
@@ -92,6 +105,8 @@ class Economy(commands.Cog):
     @stock.command(pass_context=True, aliases=["b"])
     @commands.check(not_blocked)
     async def buy(self, ctx, ticker, amount: int):
+        if amount <= 0:
+            return
         price = 0
         user = UserAccount(ctx.author.id)
         balance = user.get_balance()
@@ -119,6 +134,8 @@ class Economy(commands.Cog):
     @stock.command(pass_context=True, aliases=["s"])
     @commands.check(not_blocked)
     async def sell(self, ctx, ticker, amount: int):
+        if amount <= 0:
+            return
         price = 0
         shares = 0
         user = UserAccount(ctx.author.id)
